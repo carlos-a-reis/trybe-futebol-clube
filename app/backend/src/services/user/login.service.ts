@@ -4,6 +4,10 @@ import User from '../../database/models/UserModel';
 
 class LoginService {
   static async login(login: Login): Promise<User | null> {
+    if (!login.email || !login.password) {
+      throw new Error();
+    }
+
     const user = await User.findOne({ where: { email: login.email } });
 
     if (!user) return null;

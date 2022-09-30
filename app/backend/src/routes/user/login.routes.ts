@@ -3,7 +3,7 @@ import LoginController from '../../controllers/user/login.controller';
 
 const LoginRoutes = Router();
 
-LoginRoutes.post('/login', LoginController.requestValidation, LoginController.login);
+LoginRoutes.post('/login', LoginController.login);
 LoginRoutes.get('/login/validate', LoginController.loginValidate);
 
 export default LoginRoutes;
