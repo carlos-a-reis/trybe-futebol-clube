@@ -22,7 +22,14 @@ class MatchService {
     return matches.filter((match) => Boolean(match.inProgress) === status);
   }
 
-  static async create(match: IMacth, authorization: string | undefined): Promise<Matches> {
+  static async create(match: IMacth, authorization: string | undefined): Promise<Matches | number> {
+    if (match.homeTeam === match.awayTeam) return 401;
+
+    const checkHomeTeam = await Team.findOne({ where: { id: match.homeTeam } });
+    const checkAwayTeam = await Team.findOne({ where: { id: match.awayTeam } });
+
+    if (!checkHomeTeam || !checkAwayTeam) return 404;
+
     const validate = await User.findOne({ where: { password: authorization } });
 
     if (validate) {
@@ -32,6 +39,17 @@ class MatchService {
     }
 
     throw new Error();
+  }
+
+  static async finishMatch(id: number): Promise<void> {
+    await Matches.update({ inProgress: false }, { where: { id } });
+  }
+
+  static async updateMatch(id: number, newScore: IMacth): Promise<void> {
+    await Matches.update(
+      { homeTeamGoals: newScore.homeTeamGoals, awayTeamGoals: newScore.awayTeamGoals },
+      { where: { id } },
+    );
   }
 }
 
