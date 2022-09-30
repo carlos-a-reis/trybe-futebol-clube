@@ -1,12 +1,14 @@
 import { Request, Response } from 'express';
-import LoginService from '../../services/user/login.service';
+import UserService from '../../services/user/user.service';
 
-class LoginController {
-  static async login(req: Request, res: Response) {
+class UserController {
+  constructor(private userService: UserService) { }
+
+  async login(req: Request, res: Response) {
     try {
       const login = req.body;
 
-      const loggedUser = await LoginService.login(login);
+      const loggedUser = await this.userService.login(login);
 
       if (!loggedUser) return res.status(401).json({ message: 'Incorrect email or password' });
 
@@ -16,12 +18,12 @@ class LoginController {
     }
   }
 
-  static async loginValidate(req: Request, res: Response) {
+  async loginValidate(req: Request, res: Response) {
     const { authorization } = req.headers;
 
     if (!authorization) return res.status(401).json({ message: 'Incorrect token' });
 
-    const user = await LoginService.loginValidate(authorization);
+    const user = await this.userService.loginValidate(authorization);
 
     if (!user) return res.status(401).json({ message: 'Incorrect token' });
 
@@ -29,4 +31,4 @@ class LoginController {
   }
 }
 
-export default LoginController;
+export default UserController;

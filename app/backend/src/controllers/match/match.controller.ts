@@ -2,27 +2,29 @@ import { Request, Response } from 'express';
 import MatchService from '../../services/match/match.service';
 
 class MatchController {
-  static async getAll(req: Request, res: Response) {
+  constructor(private matchService: MatchService) { }
+
+  async getAll(req: Request, res: Response) {
     const { inProgress } = req.query;
 
     if (inProgress !== undefined) {
       const status = inProgress === 'true';
-      const matches = await MatchService.getByInProgressStatus(status);
+      const matches = await this.matchService.getByInProgressStatus(status);
 
       return res.status(200).json(matches);
     }
 
-    const matches = await MatchService.getAll();
+    const matches = await this.matchService.getAll();
 
     res.status(200).json(matches);
   }
 
-  static async create(req: Request, res: Response) {
+  async create(req: Request, res: Response) {
     const match = req.body;
     const { authorization } = req.headers;
 
     try {
-      const newMatch = await MatchService.create(match, authorization);
+      const newMatch = await this.matchService.create(match, authorization);
 
       if (newMatch === 401) {
         return res.status(newMatch).json({
@@ -40,19 +42,19 @@ class MatchController {
     }
   }
 
-  static async finishMatch(req: Request, res: Response) {
+  async finishMatch(req: Request, res: Response) {
     const { id } = req.params;
 
-    await MatchService.finishMatch(Number(id));
+    await this.matchService.finishMatch(Number(id));
 
     res.status(200).json({ message: 'Finished' });
   }
 
-  static async updateMatch(req: Request, res: Response) {
+  async updateMatch(req: Request, res: Response) {
     const { id } = req.params;
     const newScore = req.body;
 
-    await MatchService.updateMatch(Number(id), newScore);
+    await this.matchService.updateMatch(Number(id), newScore);
 
     res.status(200).json({ message: 'Match updated' });
   }

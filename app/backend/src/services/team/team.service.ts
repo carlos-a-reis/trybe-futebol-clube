@@ -1,14 +1,16 @@
 import Team from '../../database/models/TeamModel';
 
 class TeamService {
-  static async getAll(): Promise<Team[]> {
-    const teams = await Team.findAll();
+  constructor(private teamModel:typeof Team) { }
+
+  async getAll(): Promise<Team[]> {
+    const teams = await this.teamModel.findAll();
 
     return teams;
   }
 
-  static async getById(id: number): Promise<Team | null> {
-    const team = await Team.findByPk(id);
+  async getById(id: number): Promise<Team | null> {
+    const team = await this.teamModel.findByPk(id);
 
     if (!team) throw new Error();
 
