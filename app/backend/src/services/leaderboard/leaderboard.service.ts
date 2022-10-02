@@ -69,7 +69,7 @@ class LeaderboardService {
     return sortedLeaderboard;
   }
 
-  async getLeaderboard(path: string): Promise<Leaderboard[]> {
+  async getHomeOrAwayLeaderboard(path: string): Promise<Leaderboard[]> {
     const homeOrAway = path.match('home')
       ? ['homeTeam', 'homeTeamGoals', 'awayTeamGoals'] as objectKey[]
       : ['awayTeam', 'awayTeamGoals', 'homeTeamGoals'] as objectKey[];
@@ -83,6 +83,52 @@ class LeaderboardService {
     const leaderboard = teams.map((team) => {
       const teamData = matches.filter((match) => match[homeOrAway[0]] === team.id);
       return LeaderboardService.createLeaderboard(team, teamData, homeOrAway);
+    });
+
+    const sortedLeaderboard = LeaderboardService.sortLeaderboard(leaderboard);
+
+    return sortedLeaderboard;
+  }
+
+  static concatLeaderBoard(home: Leaderboard, away: Leaderboard): Leaderboard {
+    const totalPoints = home.totalPoints + away.totalPoints;
+
+    const totalGames = Number(home.totalGames) + Number(away.totalGames);
+
+    const efficiency = Number(((totalPoints / (totalGames * 3)) * 100).toFixed(2));
+
+    return {
+      name: home.name,
+      totalPoints,
+      totalGames,
+      totalVictories: home.totalVictories + away.totalVictories,
+      totalDraws: home.totalDraws + away.totalDraws,
+      totalLosses: home.totalLosses + away.totalLosses,
+      goalsFavor: home.goalsFavor + away.goalsFavor,
+      goalsOwn: home.goalsOwn + away.goalsOwn,
+      goalsBalance: home.goalsBalance + away.goalsBalance,
+      efficiency,
+    };
+  }
+
+  async getLeaderboard(): Promise<Leaderboard[]> {
+    const home = ['homeTeam', 'homeTeamGoals', 'awayTeamGoals'] as objectKey[];
+    const away = ['awayTeam', 'awayTeamGoals', 'homeTeamGoals'] as objectKey[];
+
+    const teams = await this.teamModel.findAll();
+
+    const matches = await this.matchModel.findAll({
+      where: { inProgress: 0 },
+    });
+
+    const leaderboard = teams.map((team) => {
+      const teamHomeData = matches.filter((match) => match[home[0]] === team.id);
+      const teamAwayData = matches.filter((match) => match[away[0]] === team.id);
+
+      const homeLeaderboard = LeaderboardService.createLeaderboard(team, teamHomeData, home);
+      const awayLeaderboard = LeaderboardService.createLeaderboard(team, teamAwayData, away);
+
+      return LeaderboardService.concatLeaderBoard(homeLeaderboard, awayLeaderboard);
     });
 
     const sortedLeaderboard = LeaderboardService.sortLeaderboard(leaderboard);
