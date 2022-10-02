@@ -4,8 +4,8 @@ import LeaderboardService from '../../services/leaderboard/leaderboard.service';
 class LeaderboardController {
   constructor(private leaderboardService: LeaderboardService) { }
 
-  async getHomeLeaderboard(_req: Request, res: Response) {
-    const leaderboard = await this.leaderboardService.getHomeLeaderboard();
+  async getLeaderboard(req: Request, res: Response) {
+    const leaderboard = await this.leaderboardService.getLeaderboard(req.path);
 
     res.status(200).json(leaderboard);
   }

@@ -1,3 +1,7 @@
+import Matches from '../database/models/MatcheModel';
+
+type objectKey = keyof Matches;
+
 interface Leaderboard {
   id?: number;
   name?: string;
@@ -13,3 +17,5 @@ interface Leaderboard {
 }
 
 export default Leaderboard;
+
+export { objectKey };

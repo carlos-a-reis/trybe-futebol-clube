@@ -1,4 +1,4 @@
-import Leaderboard from '../../interfaces/leaderboard.interface';
+import Leaderboard, { objectKey } from '../../interfaces/leaderboard.interface';
 import Team from '../../database/models/TeamModel';
 import Matches from '../../database/models/MatcheModel';
 
@@ -8,18 +8,18 @@ class LeaderboardService {
     private matchModel:typeof Matches,
   ) { }
 
-  static calcLeaderboard(data: Matches[]): Leaderboard {
-    const totalVictories = data.filter((game) => game.homeTeamGoals > game.awayTeamGoals).length;
+  static calcLeaderboard(data: Matches[], homeOrAway: objectKey[]): Leaderboard {
+    const totalVictories = data.filter((game) => game[homeOrAway[1]] > game[homeOrAway[2]]).length;
 
-    const totalDraws = data.filter((game) => game.homeTeamGoals === game.awayTeamGoals).length;
+    const totalDraws = data.filter((game) => game[homeOrAway[1]] === game[homeOrAway[2]]).length;
 
-    const totalLosses = data.filter((game) => game.homeTeamGoals < game.awayTeamGoals).length;
+    const totalLosses = data.filter((game) => game[homeOrAway[1]] < game[homeOrAway[2]]).length;
 
     const totalPoints = 3 * (totalVictories) + totalDraws;
 
-    const goalsFavor = data.map((game) => game.homeTeamGoals).reduce((acc, cur) => acc + cur);
+    const goalsFavor = data.map((game) => game[homeOrAway[1]]).reduce((acc, cur) => acc + cur);
 
-    const goalsOwn = data.map((game) => game.awayTeamGoals).reduce((acc, cur) => acc + cur);
+    const goalsOwn = data.map((game) => game[homeOrAway[2]]).reduce((acc, cur) => acc + cur);
 
     const goalsBalance = goalsFavor - goalsOwn;
 
@@ -37,8 +37,8 @@ class LeaderboardService {
     };
   }
 
-  static createLeaderboard(team: Team, teamData: Matches[]): Leaderboard {
-    const leaderboardCalc = LeaderboardService.calcLeaderboard(teamData);
+  static createLeaderboard(team: Team, teamData: Matches[], homeOrAway: objectKey[]): Leaderboard {
+    const leaderboardCalc = LeaderboardService.calcLeaderboard(teamData, homeOrAway);
 
     const teamLeaderBoard = {
       name: team.teamName,
@@ -69,7 +69,11 @@ class LeaderboardService {
     return sortedLeaderboard;
   }
 
-  async getHomeLeaderboard(): Promise<Leaderboard[]> {
+  async getLeaderboard(path: string): Promise<Leaderboard[]> {
+    const homeOrAway = path.match('home')
+      ? ['homeTeam', 'homeTeamGoals', 'awayTeamGoals'] as objectKey[]
+      : ['awayTeam', 'awayTeamGoals', 'homeTeamGoals'] as objectKey[];
+
     const teams = await this.teamModel.findAll();
 
     const matches = await this.matchModel.findAll({
@@ -77,8 +81,8 @@ class LeaderboardService {
     });
 
     const leaderboard = teams.map((team) => {
-      const teamData = matches.filter((match) => match.homeTeam === team.id);
-      return LeaderboardService.createLeaderboard(team, teamData);
+      const teamData = matches.filter((match) => match[homeOrAway[0]] === team.id);
+      return LeaderboardService.createLeaderboard(team, teamData, homeOrAway);
     });
 
     const sortedLeaderboard = LeaderboardService.sortLeaderboard(leaderboard);
