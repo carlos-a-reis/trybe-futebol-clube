@@ -1,11 +1,11 @@
-import BcryptService from '../../cryptography/BcryptService';
+import TokenAuthentication from '../../cryptography/tokenAuthentication';
 import Login from '../../interfaces/login.interface';
 import User from '../../database/models/UserModel';
 
 class UserService {
   constructor(private userModel:typeof User) { }
 
-  async login(login: Login): Promise<User | null> {
+  async login(login: Login): Promise<string | null> {
     if (!login.email || !login.password) {
       throw new Error();
     }
@@ -14,15 +14,22 @@ class UserService {
 
     if (!user) return null;
 
-    const checkLogin = BcryptService.compare(user.password, login.password);
+    const checkLogin = TokenAuthentication.compare(user.password, login.password);
 
-    if (checkLogin) return user;
+    if (checkLogin) {
+      const token = TokenAuthentication.encrypt(user);
+      return token;
+    }
 
     return null;
   }
 
   async loginValidate(authorization: string | undefined): Promise<User | null> {
-    const user = await this.userModel.findOne({ where: { password: authorization } });
+    if (!authorization) return null;
+
+    const { data } = TokenAuthentication.decrypt(authorization);
+
+    const user = await this.userModel.findOne({ where: { password: data.password } });
 
     return user;
   }

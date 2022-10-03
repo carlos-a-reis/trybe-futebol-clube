@@ -8,11 +8,11 @@ class UserController {
     try {
       const login = req.body;
 
-      const loggedUser = await this.userService.login(login);
+      const token = await this.userService.login(login);
 
-      if (!loggedUser) return res.status(401).json({ message: 'Incorrect email or password' });
+      if (!token) return res.status(401).json({ message: 'Incorrect email or password' });
 
-      res.status(200).json({ token: loggedUser.password });
+      res.status(200).json({ token });
     } catch (error) {
       res.status(400).json({ message: 'All fields must be filled' });
     }

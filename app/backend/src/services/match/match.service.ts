@@ -2,6 +2,7 @@ import Team from '../../database/models/TeamModel';
 import Matches from '../../database/models/MatcheModel';
 import IMacth from '../../interfaces/match.interface';
 import User from '../../database/models/UserModel';
+import TokenAuthentication from '../../cryptography/tokenAuthentication';
 
 class MatchService {
   constructor(
@@ -29,6 +30,8 @@ class MatchService {
   }
 
   async create(match: IMacth, authorization: string | undefined): Promise<Matches | number> {
+    if (!authorization) throw new Error();
+
     if (match.homeTeam === match.awayTeam) return 401;
 
     const checkHomeTeam = await this.teamModel.findOne({ where: { id: match.homeTeam } });
@@ -36,7 +39,8 @@ class MatchService {
 
     if (!checkHomeTeam || !checkAwayTeam) return 404;
 
-    const validate = await this.userModel.findOne({ where: { password: authorization } });
+    const { data } = TokenAuthentication.decrypt(authorization);
+    const validate = await this.userModel.findOne({ where: { password: data.password } });
 
     if (validate) {
       const newMatch = await this.matchModel.create({ ...match, inProgress: true });
