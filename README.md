@@ -1,16 +1,51 @@
-# 🚧 README em construção 🚧
+# Trybe Futebol Clube
 
-<!-- Olá, Tryber!
+## Contexto
 
-Esse é apenas um arquivo inicial para o README do seu projeto.
+Esse projeto se trata de uma aplicação fullstack voltada para o futebol brasileiro. Onde através do frontend são feitas requisições do tipo CRUD para o backend que possibilita o usuário a fazer login, consultar o placar de partidas em andamento e já finalizada, assim como editar e criar novas partidas e consultar tabelas de classificação por pontos feitos pelos times dentro de casa, fora de casa e por pontos gerais.
 
-É essencial que você preencha esse documento por conta própria, ok?
+Neste projeto fui responsável pela criação do backend com seus testes de integração e  do banco de dados.
 
-Não deixe de usar nossas dicas de escrita de README de projetos, e deixe sua criatividade brilhar!
+O frontend foi fornecido pela [Trybe](https://www.betrybe.com/) como parte do projeto.
 
-⚠️ IMPORTANTE: você precisa deixar nítido:
-- quais arquivos/pastas foram desenvolvidos por você; 
-- quais arquivos/pastas foram desenvolvidos por outra pessoa estudante;
-- quais arquivos/pastas foram desenvolvidos pela Trybe.
+## Técnologias usadas
 
--->
+Backend:
+> Desenvolvido usando: NodeJS, ExpressJS, MySQL, Sequelize, TypeScript, JavaScript, JWT, BcryptJS
+
+## Rodando o Projeto
+### Instalando Dependências
+
+> Na raiz do diretório:
+
+```bash
+npm install
+```
+
+### Executando a Aplicação
+
+- Para subir a aplicação:
+
+```bash
+npm run compose:up
+```
+
+- Para descer a aplicação:
+
+```bash
+npm run compose:down
+```
+
+### Executando Testes do Backend
+
+- Acesse o Backend da raiz do diretório:
+
+```bash
+cd app/backend/
+```
+
+- Para rodar os tests:
+
+```bash
+npm test
+```
