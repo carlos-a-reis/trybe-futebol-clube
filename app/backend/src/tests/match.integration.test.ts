@@ -23,7 +23,10 @@ const dumpMatches = [
   { ...dumpMatch, id: 3, inProgress: 1 },
 ];
 
-const dumpToken = '$2a$08$xi.Hxk1czAO0nZR..B393u10aED0RQ1N3PAEXQ7HxtLjKPEZBu.PW';
+const dumpUserLogin = {
+  email: 'admin@admin.com',
+  password: 'secret_admin',
+};
 
 describe('Testes da rota /matches', () => {
   describe('Requisição GET que retorna todas as partidas', () => {
@@ -59,8 +62,10 @@ describe('Testes da rota /matches', () => {
     });
 
     it('Deve criar uma partida com sucesso', async () => {
+      const tokenResponse = await chai.request(app).post('/login').send(dumpUserLogin);
+      const { token } = tokenResponse.body;
       const response = await chai.request(app).post('/matches').send(dumpMatch)
-      .set('authorization', dumpToken);
+      .set('authorization', token);
 
       expect(response.status).to.equal(201);
       expect(response.body).to.deep.equal({ ...dumpMatch, id: 1, inProgress: 1 });
