@@ -19,15 +19,15 @@ class UserController {
   }
 
   async loginValidate(req: Request, res: Response) {
-    const { authorization } = req.headers;
+    try {
+      const { authorization } = req.headers;
 
-    if (!authorization) return res.status(401).json({ message: 'Incorrect token' });
+      const user = await this.userService.loginValidate(authorization);
 
-    const user = await this.userService.loginValidate(authorization);
-
-    if (!user) return res.status(401).json({ message: 'Incorrect token' });
-
-    res.status(200).json({ role: user.role });
+      res.status(200).json({ role: user.role });
+    } catch (error) {
+      res.status(401).json({ message: 'Incorrect token' });
+    }
   }
 }
 

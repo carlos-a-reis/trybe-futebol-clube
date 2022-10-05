@@ -5,12 +5,13 @@ import chaiHttp = require('chai-http');
 
 import { app } from '../app';
 import User from '../database/models/UserModel';
+import TokenAuthentication from '../cryptography/tokenAuthentication';
 
 chai.use(chaiHttp);
 
 const { expect } = chai;
 
-const dumpToken = '$2a$08$xi.Hxk1czAO0nZR..B393u10aED0RQ1N3PAEXQ7HxtLjKPEZBu.PW';
+const dumpToken = 'example.token.a$08$xi.xk1czAO0nZR..B393u1.ssf';
 
 const dumpUserLogin = {
   email: 'admin@admin.com',
@@ -22,14 +23,17 @@ const dumpReturnUser = {
   username: 'Admin',
   role: 'admin',
   email: 'admin@admin.com',
-  password: dumpToken,
+  password: '$2a$08$xi.Hxk1czAO0nZR..B393u10aED0RQ1N3PAEXQ7HxtLjKPEZBu.PW',
 }
+
 
 describe('Testes da rota /login', () => {
   describe('Requisição de login', () => {
 
     before(() => {
       Sinon.stub(User, 'findOne').resolves(dumpReturnUser as User);
+      Sinon.stub(TokenAuthentication, 'compare').resolves(true);
+      Sinon.stub(TokenAuthentication, 'encrypt').resolves(dumpToken);
     })
 
     after(() => {
@@ -108,8 +112,10 @@ describe('Testes da rota /login/validate', () => {
     })
 
     it('Deve fazer a validação com sucesso', async () => {
+      const tokenResponse = await chai.request(app).post('/login').send(dumpUserLogin);
+      const { token } = tokenResponse.body;
       const response = await chai.request(app).get('/login/validate')
-        .set('authorization', dumpToken);
+        .set('authorization', token as string);
 
       expect(response.status).to.equal(200);
       expect(response.body).to.deep.equal({ role: dumpReturnUser.role });

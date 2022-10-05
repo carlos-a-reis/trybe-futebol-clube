@@ -24,14 +24,14 @@ class UserService {
     return null;
   }
 
-  async loginValidate(authorization: string | undefined): Promise<User | null> {
-    if (!authorization) return null;
+  async loginValidate(authorization: string | undefined): Promise<User> {
+    if (!authorization) throw new Error();
 
     const { data } = TokenAuthentication.decrypt(authorization);
 
     const user = await this.userModel.findOne({ where: { password: data.password } });
 
-    return user;
+    return user as User;
   }
 }
 
